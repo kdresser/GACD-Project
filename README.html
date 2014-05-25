@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
+
+<title>Getting and Cleaning Data - Course Project</title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+
+
+
+
+</head>
+
+<body>
+<h1>Getting and Cleaning Data - Course Project</h1>
+
+<h2>Subset Samsung S3 Motion Data.</h2>
+
+<h3>Overview</h3>
+
+<p>Data were collected from subjects&#39; Galaxy S3 smartphones while doing various activities.  A full description of the data is at:</p>
+
+<p><a href="http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones">http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones</a></p>
+
+<p>The source data (taken on May 25, 2014) is at:</p>
+
+<p><a href="https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip">https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip</a></p>
+
+<h3>The steps taken to select a subset of the data were:</h3>
+
+<h3>Load required libraries.</h3>
+
+<pre><code>library(stats)
+library(plyr)
+</code></pre>
+
+<h3>Read raw data.</h3>
+
+<pre><code>subjectsTest &lt;- read.table(&#39;subject_test.txt&#39;)
+subjectsTrain &lt;- read.table(&#39;subject_train.txt&#39;)
+
+featuresTest &lt;- read.table(&#39;X_test.txt&#39;, sep=&#39;&#39;, row.names=NULL, colClasses=c(&#39;numeric&#39;), strip.white=TRUE)
+featuresTrain &lt;- read.table(&#39;X_train.txt&#39;, sep=&#39;&#39;, row.names=NULL, colClasses=c(&#39;numeric&#39;), strip.white=TRUE)
+
+activitiesTest &lt;- read.table(&#39;y_test.txt&#39;)
+activitiesTrain &lt;- read.table(&#39;y_train.txt&#39;)
+</code></pre>
+
+<h3>Define a features column selector.</h3>
+
+<pre><code>subsetFeaturesColNums &lt;- c(
+  1,2,3,4,5,6,41,42,43,44,45,46,81,82,83,84,85,86,
+  121,122,123,124,125,126,161,162,163,164,165,166,
+  201,202,214,215,227,228,240,241,
+  253,254,266,267,268,269,270,271,
+  345,346,347,348,349,350,424,425,426,427,428,429,
+  503,504,516,517,529,530,542,543
+  )
+</code></pre>
+
+<h3>Define names for the selected feature columns.</h3>
+
+<pre><code>subsetFeaturesColNames &lt;- c(
+  &#39;tBodyAccMeanX&#39;,
+  &#39;tBodyAccMeanY&#39;,
+  &#39;tBodyAccMeanZ&#39;,
+  &#39;tBodyAccStdX&#39;,
+  &#39;tBodyAccStdY&#39;,
+  &#39;tBodyAccStdZ&#39;,
+  &#39;tGravityAccMeanX&#39;,
+  &#39;tGravityAccMeanY&#39;,
+  &#39;tGravityAccMeanZ&#39;,
+  &#39;tGravityAccStdX&#39;,
+  &#39;tGravityAccStdY&#39;,
+  &#39;tGravityAccStdZ&#39;,
+  &#39;tBodyAccJerkMeanX&#39;,
+  &#39;tBodyAccJerkMeanY&#39;,
+  &#39;tBodyAccJerkMeanZ&#39;,
+  &#39;tBodyAccJerkStdX&#39;,
+  &#39;tBodyAccJerkStdY&#39;,
+  &#39;tBodyAccJerkStdZ&#39;,
+  &#39;tBodyGyroMeanX&#39;,
+  &#39;tBodyGyroMeanY&#39;,
+  &#39;tBodyGyroMeanZ&#39;,
+  &#39;tBodyGyroStdX&#39;,
+  &#39;tBodyGyroStdY&#39;,
+  &#39;tBodyGyroStdZ&#39;,
+  &#39;tBodyGyroJerkMeanX&#39;,
+  &#39;tBodyGyroJerkMeanY&#39;,
+  &#39;tBodyGyroJerkMeanZ&#39;,
+  &#39;tBodyGyroJerkStdX&#39;,
+  &#39;tBodyGyroJerkStdY&#39;,
+  &#39;tBodyGyroJerkStdZ&#39;,
+  &#39;tBodyAccMagMean&#39;,
+  &#39;tBodyAccMagStd&#39;,
+  &#39;tGravityAccMagMean&#39;,
+  &#39;tGravityAccMagStd&#39;,
+  &#39;tBodyAccJerkMagMean&#39;,
+  &#39;tBodyAccJerkMagStd&#39;,
+  &#39;tBodyGyroMagMean&#39;,
+  &#39;tBodyGyroMagStd&#39;,
+  &#39;tBodyGyroJerkMagMean&#39;,
+  &#39;tBodyGyroJerkMagStd&#39;,
+  &#39;fBodyAccMeanX&#39;,
+  &#39;fBodyAccMeanY&#39;,
+  &#39;fBodyAccMeanZ&#39;,
+  &#39;fBodyAccStdX&#39;,
+  &#39;fBodyAccStdY&#39;,
+  &#39;fBodyAccStdZ&#39;,
+  &#39;fBodyAccJerkMeanX&#39;,
+  &#39;fBodyAccJerkMeanY&#39;,
+  &#39;fBodyAccJerkMeanZ&#39;,
+  &#39;fBodyAccJerkStdX&#39;,
+  &#39;fBodyAccJerkStdY&#39;,
+  &#39;fBodyAccJerkStdZ&#39;,
+  &#39;fBodyGyroMeanX&#39;,
+  &#39;fBodyGyroMeanY&#39;,
+  &#39;fBodyGyroMeanZ&#39;,
+  &#39;fBodyGyroStdX&#39;,
+  &#39;fBodyGyroStdY&#39;,
+  &#39;fBodyGyroStdZ&#39;,
+  &#39;fBodyAccMagMean&#39;,
+  &#39;fBodyAccMagStd&#39;,
+  &#39;fBodyBodyAccJerkMagMean&#39;,
+  &#39;fBodyBodyAccJerkMagStd&#39;,
+  &#39;fBodyBodyGyroMagMean&#39;,
+  &#39;fBodyBodyGyroMagStd&#39;,
+  &#39;fBodyBodyGyroJerkMagMean&#39;,
+  &#39;fBodyBodyGyroJerkMagStd&#39;  
+  )
+</code></pre>
+
+<h3>Select feature subsets.</h3>
+
+<pre><code>subsetFeaturesTest &lt;- featuresTest[, subsetFeaturesColNums]
+subsetFeaturesTrain &lt;- featuresTrain[, subsetFeaturesColNums]
+</code></pre>
+
+<h3>Catenate test and train data.</h3>
+
+<pre><code>activities &lt;- rbind(activitiesTest, activitiesTrain)
+subsetFeatures &lt;- rbind(subsetFeaturesTest, subsetFeaturesTrain)
+subjects &lt;- rbind(subjectsTest, subjectsTrain)
+</code></pre>
+
+<h3>Convert activities to factors.</h3>
+
+<pre><code>activityLevels = c(
+  1, 2, 3, 4, 5, 6
+  )
+
+activityNames = c(
+  &#39;Walking&#39;, 
+  &#39;WalkingUpstairs&#39;, 
+  &#39;WalkingDownstairs&#39;, 
+  &#39;Sitting&#39;, 
+  &#39;Standing&#39;, 
+  &#39;Laying&#39;
+  )
+
+activitiesFactors &lt;- activities
+activitiesFactors$V1 &lt;- factor(activities$V1, activityLevels, activityNames)
+</code></pre>
+
+<h3>Add column names.</h3>
+
+<pre><code>colnames(subjects) &lt;- &#39;Subject&#39;
+colnames(activitiesFactors) &lt;- &#39;Activity&#39;
+colnames(subsetFeatures) &lt;- subsetFeaturesColNames
+</code></pre>
+
+<h3>Catenate columns into final dataset.</h3>
+
+<pre><code>combinedSubset &lt;- cbind(subjects, activitiesFactors, subsetFeatures)
+</code></pre>
+
+<h3>Make a new dataset of grouped averages.</h3>
+
+<p>I.e, the means and standard deviations are averaged by group.
+Grouping is by Subject and Activity.</p>
+
+<pre><code>groupedAverages &lt;- ddply(combinedSubset, .(Subject, Activity), colwise(mean))
+</code></pre>
+
+<h3>Output (.csv as .txt).</h3>
+
+<pre><code>write.csv(groupedAverages, &#39;groupedAverages.txt&#39;)
+</code></pre>
+
+<p>###</p>
+
+</body>
+
+</html>
+
