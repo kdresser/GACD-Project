@@ -136,6 +136,10 @@ colnames(subsetFeatures) <- subsetFeaturesColNames
 
 combinedSubset <- cbind(subjects, activitiesFactors, subsetFeatures)
 
+# Output (.csv as .txt).
+
+write.csv(combinedSubset, 'combinedSubset.txt')
+
 # Make a new dataset of grouped averages.
 # I.e, the means and standard deviations are averaged by group.
 # Grouping is by Subject and Activity.

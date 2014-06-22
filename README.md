@@ -1,28 +1,28 @@
-Getting and Cleaning Data - Course Project
+GaCD - Course Project
 ========================================================
 
-## Subset Samsung S3 Motion Data.
+## Subset and analyse Samsung S3 Motion Data.
 
 ### Overview
 
-Data were collected from subjects' Galaxy S3 smartphones while doing various activities.  A full description of the data is at:
+Data were collected from subjects' Galaxy S3 smartphones while doing various activities.  A full description of the raw data is at:
 
 http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
 
-The source data (taken on May 25, 2014) is at:
+The source data (taken on May 25, 2014) are at:
 
 https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
 
-### The steps taken to select a subset of the data were:
+## Part 1.
 
-### Load required libraries.
+### Take a subset of the raw data.  Do some tidying.
 
 ```
 library(stats)
 library(plyr)
 ```
 
-### Read raw data.
+### Read the raw data.
 
 ```
 subjectsTest <- read.table('subject_test.txt')
@@ -39,7 +39,7 @@ activitiesTrain <- read.table('y_train.txt')
 
 ```
 subsetFeaturesColNums <- c(
-  1,2,3,4,5,6,41,42,43,44,45,46,81,82,83,84,85,86,
+  001,002,003,004,005,006,041,042,043,044,045,046,081,082,083,084,085,086,
   121,122,123,124,125,126,161,162,163,164,165,166,
   201,202,214,215,227,228,240,241,
   253,254,266,267,268,269,270,271,
@@ -128,7 +128,7 @@ subsetFeaturesTest <- featuresTest[, subsetFeaturesColNums]
 subsetFeaturesTrain <- featuresTrain[, subsetFeaturesColNums]
 ```
 
-### Catenate test and train data.
+### Catenate test and training data.
 
 ```
 activities <- rbind(activitiesTest, activitiesTrain)
@@ -164,21 +164,29 @@ colnames(activitiesFactors) <- 'Activity'
 colnames(subsetFeatures) <- subsetFeaturesColNames
 ```
 
-### Catenate columns into final dataset.
+### Catenate columns into final dataset 1.
 
 ```
 combinedSubset <- cbind(subjects, activitiesFactors, subsetFeatures)
 ```
 
-### Make a new dataset of grouped averages.
-I.e, the means and standard deviations are averaged by group.
-Grouping is by Subject and Activity.
+### Output the combinedSubset (.csv as .txt).
+
+```
+write.csv(combinedSubset, 'combinedSubset.txt')
+```
+
+## Part 2.
+
+### From combinedDataset, make a new dataset: groupedAverages.
+
+The means and standard deviations are averaged by group, and the grouping is by Subject and Activity.
 
 ```
 groupedAverages <- ddply(combinedSubset, .(Subject, Activity), colwise(mean))
 ```
 
-### Output (.csv as .txt).
+### Output groupedAverages (.csv as .txt).
 
 ```
 write.csv(groupedAverages, 'groupedAverages.txt')
